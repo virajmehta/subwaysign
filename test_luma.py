@@ -2,18 +2,19 @@ import time
 
 from luma.core.interface.serial import spi, noop
 from luma.core.render import canvas
-from luma.core.virtual import viewport
+# from luma.core.virtual import viewport, terminal
 from luma.led_matrix.device import max7219
+from PIL import ImageFont
 
 serial = spi(port=0, device=0, gpio=noop())
-device = max7219(serial)
+device = max7219(serial, cascaded=4, block_orientation=-90, rotate=0)
 
-virtual = viewport(device, width=200, height=100)
+font = ImageFont.truetype("pixelmix.ttf", 8)
+text = "hello"
+position = (0, 0)
+fill="white"
 
-with canvas(virtual) as draw:
-    draw.rectangle(device.bounding_box, outline="white", fill="black")
-    draw.text((3, 3), "Hello world", fill="white")
+with canvas(device) as draw:
+    draw.text(position, text, fill=fill, font=font)
 
-for offset in range(8):
-    virtual.set_position((offset, offset))
-    time.sleep(0.1)
+time.sleep(20)
