@@ -1,0 +1,12 @@
+[Unit]
+Description=Subway Sign
+After=multi-user.target
+
+[Service]
+Type=forking
+User=viraj
+ExecStart=/usr/bin/tmux new-session -d -s subwaysign '/bin/bash /home/viraj/subwaysign/start_subwaysign.sh'
+ExecStop=/usr/bin/tmux kill-session -t subwaysign
+
+[Install]
+WantedBy=multi-user.target

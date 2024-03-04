@@ -48,25 +48,3 @@ def get_arrivals_at_station(
     ]
     arrivals = [arrival for arrival in arrivals if arrival is not None]
     return arrivals
-
-
-def arrivals_generator_interval(
-    feed,
-    train: str,
-    stop_id: str,
-    direction: str,
-    interval: int,
-    max_time: Optional[timedelta] = timedelta(minutes=30),
-):
-    while True:
-        try:
-            arrivals = get_arrivals_at_station(feed, train, stop_id, direction)
-        except Exception as e:
-            print(e)
-            yield "Error"
-            time.sleep(interval)
-            continue
-        if max_time:
-            arrivals = [arrival for arrival in arrivals if arrival.time_left < max_time]
-        yield arrivals
-        time.sleep(interval)

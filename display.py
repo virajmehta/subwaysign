@@ -17,5 +17,6 @@ class Display:
         self.text_color = "white"
 
     def write(self, text):
+        print(text)
         with canvas(self.device) as draw:
             draw.text(self.position, text, fill=self.text_color, font=self.font)
