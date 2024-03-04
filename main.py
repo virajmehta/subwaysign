@@ -26,7 +26,6 @@ def main():
             else:
                 minutes, seconds = arrivals[train_idx].get_minutes_seconds()
                 time_str = f"{minutes}:{seconds:02}"
-                print(f"{time_str=}")
                 message = f"L{time_str:>5}"
                 display.write(message)
             time.sleep(1)

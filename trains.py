@@ -46,5 +46,10 @@ def get_arrivals_at_station(
     arrivals = [
         get_arrival_at_station(train, stop_id, direction) for train in feed.trips
     ]
-    arrivals = [arrival for arrival in arrivals if arrival is not None]
-    return arrivals
+    now = datetime.now()
+    cleaned_arrivals = []
+    for a in arrivals:
+        if a and now < a.time:
+            cleaned_arrivals.append(a)
+
+    return cleaned_arrivals
