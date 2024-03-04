@@ -1,0 +1,4 @@
+requests==2.31.0
+protobuf==4.35.3
+gtfs-realtime-bindings==1.0.0
+nyct-gtfs==1.3.2
