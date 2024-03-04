@@ -1,71 +1,8 @@
 import os
-import time
 from nyct_gtfs import NYCTFeed
-from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Optional, List, Tuple
-
-
-@dataclass
-class StationStop:
-    time: datetime
-    name: str
-
-    @property
-    def time_left(self) -> timedelta:
-        return self.time - datetime.now()
-
-    def get_minutes_seconds(self) -> Tuple[int, int]:
-        minutes = self.time_left.seconds // 60
-        seconds = self.time_left.seconds % 60
-        return minutes, seconds
-
-    @property
-    def formatted_time_left(self) -> str:
-        minutes, seconds = self.get_minutes_seconds()
-        return f"{minutes}m {seconds}s"
-
-    def __str__(self):
-        return f"Arriving at {self.name} in {self.formatted_time_left}"
-
-
-def get_arrival_at_station(
-    train, stop_id: str, direction: str
-) -> Optional[StationStop]:
-    if train.direction != direction:
-        return None
-    stop_time_updates = train.stop_time_updates
-    for stop in stop_time_updates:
-        if stop.stop_id == stop_id:
-            return StationStop(stop.arrival, stop.stop_name)
-    return None
-
-
-def get_arrivals_at_station(
-    feed, train: str, stop_id: str, direction: str
-) -> List[StationStop]:
-    feed.refresh()
-    arrivals = [
-        get_arrival_at_station(train, stop_id, direction) for train in feed.trips
-    ]
-    arrivals = [arrival for arrival in arrivals if arrival is not None]
-    return arrivals
-
-
-def arrivals_generator_interval(
-    feed,
-    train: str,
-    stop_id: str,
-    direction: str,
-    interval: int,
-    max_time: Optional[timedelta] = timedelta(minutes=30),
-):
-    while True:
-        arrivals = get_arrivals_at_station(feed, train, stop_id, direction)
-        if max_time:
-            arrivals = [arrival for arrival in arrivals if arrival.time_left < max_time]
-        yield arrivals
-        time.sleep(interval)
+from datetime import datetime
+from trains import arrivals_generator_interval
+from display import Display
 
 
 def main():
@@ -73,10 +10,20 @@ def main():
     direction = "N"
     stop_id = "L10N"
     train = "L"
+    interval = 10
     feed = NYCTFeed(train, mta_api_key)
-    for arrivals in arrivals_generator_interval(feed, train, stop_id, direction, 10):
-        print(datetime.now())
-        print("\n".join([str(arrival) for arrival in arrivals]))
+    display = Display()
+    for arrivals in arrivals_generator_interval(
+        feed, train, stop_id, direction, interval
+    ):
+        if arrivals == "Error":
+            message = "Error!"
+        elif len(arrivals) == 0:
+            message = "no trains"
+        else:
+            minutes, seconds = arrivals[0].get_minutes_seconds()
+            message = f"{minutes}m {seconds}s"
+        display.write(message)
 
 
 if __name__ == "__main__":
