@@ -13,6 +13,10 @@ class StationStop:
     def time_left(self) -> timedelta:
         return self.time - datetime.now()
 
+    @property
+    def happened(self)-> bool:
+        return self.time < datetime.now()
+
     def get_minutes_seconds(self) -> Tuple[int, int]:
         minutes = self.time_left.seconds // 60
         seconds = self.time_left.seconds % 60

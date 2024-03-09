@@ -4,6 +4,7 @@ from nyct_gtfs import NYCTFeed
 from datetime import datetime
 from trains import get_arrivals_at_station
 from display import Display
+import tensorzero
 
 
 def main():
@@ -17,12 +18,18 @@ def main():
     display = Display()
     while True:
         arrivals = get_arrivals_at_station(feed, train, stop_id, direction)
+        status = tensorzero.get_status()
         for t in range(refresh_interval):
-            train_idx = 0 if t % 15 < 10 or len(arrivals) == 1 else 1
+            while arrivals[0].happened:
+                arrivals.pop(0)
+            train_idx = 0 if t % 15 < 9 or len(arrivals) == 1 else 1
             if arrivals == "Error":
                 display.write("Error!")
             elif len(arrivals) == 0:
                 display.write("no trains")
+            elif t % 15 >= 13:
+                message = "T0: up" if status else "T0: down"
+                display.write(message)
             else:
                 minutes, seconds = arrivals[train_idx].get_minutes_seconds()
                 time_str = f"{minutes}:{seconds:02}"
